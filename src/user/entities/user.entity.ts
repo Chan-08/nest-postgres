@@ -1,6 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Academic } from './academic.entity';
+import { Job } from './job.entity';
 
-@Entity({ name: 'user' }) // ← force TypeORM to map to correct table
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -8,12 +10,18 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column()
   password: string;
 
-  @CreateDateColumn()
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
+
+  @OneToMany(() => Academic, (academic) => academic.user)
+  academics: Academic[];
+
+  @OneToMany(() => Job, (job) => job.user)
+  jobs: Job[];
 }

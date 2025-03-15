@@ -3,6 +3,8 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { User } from './user/entities/user.entity';
+import { Academic } from './user/entities/academic.entity';
+import { Job } from './user/entities/job.entity';
 
 @Module({
   imports: [
@@ -13,7 +15,7 @@ import { User } from './user/entities/user.entity';
       username: 'postgres',
       password: 'chan',
       database: 'my_nest_app',
-      entities: [User],
+      entities: [User, Academic, Job],
       synchronize: false,
       autoLoadEntities: true,
     }),

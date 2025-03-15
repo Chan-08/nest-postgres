@@ -2,23 +2,20 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-
-
 
 @Injectable()
 export class UserService {
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+
+    private readonly dataSource: DataSource // ✅ Inject DataSource here
   ) {}
 
   async findAll(): Promise<User[]> {
-    const users = await this.userRepository.find();
-    return users;
+    return await this.userRepository.find();
   }
 
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
@@ -30,22 +27,33 @@ export class UserService {
     return { message: 'User created successfully' };
   }
 
-  
-
   async createBulkUsers(users: CreateUserDto[]): Promise<void> {
     const userJson = JSON.stringify(users);
-    await this.userRepository.query(`SELECT create_users_bulk($1::jsonb)`, [userJson]);
-}
-
-async findOne(id: number): Promise<User> {
-  const user = await this.userRepository.findOneBy({ id });
-
-  if (!user) {
-    throw new NotFoundException(`User with ID ${id} not found`);
+    await this.userRepository.query(
+      `SELECT create_users_bulk($1::jsonb)`,
+      [userJson]
+    );
   }
 
-  return user;
-}
+  async getUserDetailsById(userId: number) {
+    return await this.dataSource.query(`
+      SELECT 
+        u.id,
+        u.name,
+        u.email,
+        u.created_at,
+        a.degree,
+        a.university,
+        a.year_of_passing,
+        j.company,
+        j.designation,
+        j.experience_years
+      FROM "user" u
+      LEFT JOIN academics a ON u.id = a.user_id
+      LEFT JOIN jobs j ON u.id = j.user_id
+      WHERE u.id = $1
+    `, [userId]);
+  }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
     const { name, email, password } = updateUserDto;
@@ -54,9 +62,8 @@ async findOne(id: number): Promise<User> {
       [id, name, email, password]
     );
   }
-  
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number): Promise<void> {
+    await this.userRepository.delete(id);
   }
 }
