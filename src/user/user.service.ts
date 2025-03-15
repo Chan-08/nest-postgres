@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
+
+
+
 @Injectable()
 export class UserService {
 
@@ -15,11 +19,6 @@ export class UserService {
   async findAll(): Promise<User[]> {
     const users = await this.userRepository.find();
     return users;
-  }
-  
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
   }
 
   async create(createUserDto: CreateUserDto): Promise<{ message: string }> {
@@ -38,7 +37,16 @@ export class UserService {
     await this.userRepository.query(`SELECT create_users_bulk($1::jsonb)`, [userJson]);
 }
 
-  
+async findOne(id: number): Promise<User> {
+  const user = await this.userRepository.findOneBy({ id });
+
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
+  }
+
+  return user;
+}
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
     const { name, email, password } = updateUserDto;
     await this.userRepository.query(

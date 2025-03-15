@@ -18,9 +18,10 @@ export class UserController {
   }
   
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<User> {
+    return await this.userService.findOne(+id);
   }
+  
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
