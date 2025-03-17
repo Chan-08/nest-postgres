@@ -1,3 +1,5 @@
+// user.entity.ts
+
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Academic } from './academic.entity';
 import { Job } from './job.entity';

@@ -11,7 +11,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
-    private readonly dataSource: DataSource // ✅ Inject DataSource here
+    private readonly dataSource: DataSource 
   ) {}
 
   async findAll(): Promise<User[]> {
